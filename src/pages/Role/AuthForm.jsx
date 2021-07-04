@@ -63,6 +63,7 @@ export default class AuthForm extends Component {
               children:this.Ctree 
             }
           ];
+          console.log(treeData);
 
           const {role} = this.props;
           const {checkedKeys} = this.state;
