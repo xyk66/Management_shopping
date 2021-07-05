@@ -1,13 +1,20 @@
-import React, { Component } from 'react'
-import {Card,Button,Table,Modal} from 'antd'
+import React, { Component ,createRef} from 'react'
+import {Card,Button,Table,Modal,message} from 'antd'
 import {formateDate} from '../../utils/GetDate'
 import LinkButton from '../../components/LinkButton/LinkButton'
 
+import {reqDeleteUser} from '../../api/index'
+
+import Userform from './User_form'
+
 //请求
-import {reqUsers} from '../../api/index'
+import {reqUsers,reqAddUser} from '../../api/index'
 
 //用户 路由
 export default class User extends Component {
+
+    addUpdateRef = createRef();
+
     state = {
         users : [], //所有用户的数组
         roles : [],//所有角色的数组
@@ -39,7 +46,7 @@ export default class User extends Component {
             render : (user)=>{
                 return (<span>
                     <LinkButton style={{marginRight:15}}>修改</LinkButton>
-                    <LinkButton>删除</LinkButton>
+                    <LinkButton  onClick={()=>{this.deleteUser(user)}}>删除</LinkButton>
                 </span>)
             }
             },
@@ -48,8 +55,23 @@ export default class User extends Component {
 
 
     //添加或更新用户
-    AddorUpdateUser = ()=>{
+    AddorUpdateUser = async()=>{
+        this.setState({isShow:false});
+        //收集表单数据
+        const user = this.addUpdateRef.current.formRef.current.getFieldsValue();
 
+        //清空列表框
+        this.addUpdateRef.current.formRef.current.resetFields();
+
+        //提交请求
+        const res = await reqAddUser(user);
+        if(res.status === 0){
+            message.success("添加成功!")
+            this.getUsers(); 
+        }else{
+            message.error("添加失败!")
+        }
+       
     }
 
     //获取所有用户列表
@@ -62,6 +84,24 @@ export default class User extends Component {
         }
     }
 
+
+    //删除相关用户
+    deleteUser = (user)=>{
+        Modal.confirm({
+            title: `确认删除${user.username}吗?`,
+            onOk : async ()=>{
+                console.log(user._id);
+                const res = await reqDeleteUser(user._id);
+                if(res.status === 0){
+                    message.success("删除成功!");
+                    this.getUsers();
+                }else{
+                    message.error("删除失败!")
+                }
+            },
+        });
+    }
+
     //生命周期函数
     componentWillMount(){
         this.intiColumns();
@@ -72,8 +112,8 @@ export default class User extends Component {
     }
     render() {
 
-        const {users,isShow} = this.state;
-        const title = <Button type="primary">创建用户</Button>
+        const {users,isShow,roles} = this.state;
+        const title = <Button type="primary" onClick={()=>this.setState({isShow:true})}>创建用户</Button>
         return (
             <Card title={title}>
                 <Table
@@ -90,7 +130,7 @@ export default class User extends Component {
                 onOk = {this.AddorUpdateUser}
                 onCancel = {()=> this.setState({isShow:false})}
                 > 
-
+                    <Userform roles = {roles} ref={this.addUpdateRef}/>
                 </Modal>
             </Card>
         )

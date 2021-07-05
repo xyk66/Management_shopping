@@ -49,3 +49,9 @@ export const reqUpdateRole = (role) => ajax(BASE+'/manage/role/update',role,'POS
 
 //获取用户列表
 export const reqUsers = ()=>ajax(BASE+'/manage/user/list')
+
+//删除用户
+export const reqDeleteUser = (_id)=>ajax(BASE+'/manage/user/delete',{_id},'POST')
+
+//添加用户
+export const reqAddUser = (user)=>ajax(BASE+'/manage/user/add',user,"POST")
