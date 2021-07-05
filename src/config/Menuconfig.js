@@ -13,7 +13,8 @@ const menuList = [
     {
         title:'首页', //标题名称
         key : '/home', //路由
-        icon : <PieChartOutlined/> //图标名称
+        icon : <PieChartOutlined/>, //图标名称
+        isPublic : true //是否公开
     },
     {
         title:'商品', //标题名称

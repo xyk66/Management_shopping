@@ -8,7 +8,7 @@ import {reqDeleteUser} from '../../api/index'
 import Userform from './User_form'
 
 //请求
-import {reqUsers,reqAddUser} from '../../api/index'
+import {reqUsers,reqAddOrUpdateUser} from '../../api/index'
 
 //用户 路由
 export default class User extends Component {
@@ -45,7 +45,7 @@ export default class User extends Component {
             {title: '操作',
             render : (user)=>{
                 return (<span>
-                    <LinkButton style={{marginRight:15}}>修改</LinkButton>
+                    <LinkButton style={{marginRight:15}} onClick={()=>this.UserUpdate(user)}>修改</LinkButton>
                     <LinkButton  onClick={()=>{this.deleteUser(user)}}>删除</LinkButton>
                 </span>)
             }
@@ -53,6 +53,11 @@ export default class User extends Component {
         ]
     }
 
+    //显示添加界面
+    showAdd = ()=>{
+        this.user = null;
+        this.setState({isShow:true});
+    }
 
     //添加或更新用户
     AddorUpdateUser = async()=>{
@@ -63,13 +68,15 @@ export default class User extends Component {
         //清空列表框
         this.addUpdateRef.current.formRef.current.resetFields();
 
+        if(this.user && this.user._id){
+            user._id = this.user._id;
+        }
+
         //提交请求
-        const res = await reqAddUser(user);
+        const res = await reqAddOrUpdateUser(user);
         if(res.status === 0){
-            message.success("添加成功!")
+            message.success(`成功!`)
             this.getUsers(); 
-        }else{
-            message.error("添加失败!")
         }
        
     }
@@ -102,6 +109,16 @@ export default class User extends Component {
         });
     }
 
+
+    //修改
+    UserUpdate = (user)=>{
+        //保存当前user
+        this.user = user;
+
+        //更新状态
+        this.setState({isShow:true});
+    }
+
     //生命周期函数
     componentWillMount(){
         this.intiColumns();
@@ -113,7 +130,8 @@ export default class User extends Component {
     render() {
 
         const {users,isShow,roles} = this.state;
-        const title = <Button type="primary" onClick={()=>this.setState({isShow:true})}>创建用户</Button>
+        const user = this.user || {};
+        const title = <Button type="primary" onClick={this.showAdd}>创建用户</Button>
         return (
             <Card title={title}>
                 <Table
@@ -125,12 +143,13 @@ export default class User extends Component {
                 />
 
                 <Modal 
-                title="添加用户" 
+                title={user._id?"修改用户":"添加用户"}
                 visible={isShow}
                 onOk = {this.AddorUpdateUser}
                 onCancel = {()=> this.setState({isShow:false})}
+                destroyOnClose = {true}
                 > 
-                    <Userform roles = {roles} ref={this.addUpdateRef}/>
+                    <Userform roles = {roles} ref={this.addUpdateRef} user={user}/>
                 </Modal>
             </Card>
         )

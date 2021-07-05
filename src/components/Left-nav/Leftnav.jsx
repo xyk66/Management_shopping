@@ -11,6 +11,8 @@ import './index.less'
 //引入导航菜单的数据
 import MenuList from '../../config/Menuconfig.js'
 
+import memory from '../../utils/memory'
+
 //antd
 import { Menu } from 'antd';
 
@@ -21,36 +23,48 @@ const { SubMenu } = Menu;
 
 
 class Leftnav extends Component {
+    //判断当前登录用户是否有权限
+    hasAuth = (item)=>{
+        const {key,isPublic} = item;
+        const menus = memory.user.role.menus;
+        const username = memory.user.username;
 
+        if(username === 'admin' || isPublic || menus.indexOf(key) !== -1){
+            return true;
+        }else if(item.children){
+           return !!item.children.find(child => menus.indexOf(child.key) !== -1)
+        }
+        return false;
+    }
 
     //根据menu的数据动态生成对应的标签
     renderAllList = (MenuList)=>{
         const path = this.props.location.pathname;
-        return MenuList.map(item => {
-            if(!item.children){
-                // let icon = item.icon;
-                return (
-                    <Menu.Item key={item.key} icon={item.icon}>
+        return MenuList.reduce((pre,item) => {
+
+            if(this.hasAuth(item)){
+                if(!item.children){
+                    // let icon = item.icon;
+                    pre.push((<Menu.Item key={item.key} icon={item.icon}>
                         <Link to={item.key}>{item.title}</Link>
-                    </Menu.Item>
-                )
-            }else{
-
-                const Citem = item.children.find(Citem => path.indexOf(Citem.key) === 0);
-                if(Citem){
-                    this.openKey = item.key;
-                }
-
-                return (
-                    <SubMenu key={item.key} icon={item.icon} title={item.title}>
-                        {/* <Menu.Item key="2" icon={<MenuOutlined />}><Link to="/category">品类管理</Link></Menu.Item> */}
+                    </Menu.Item>))
+                }else{
+    
+                    const Citem = item.children.find(Citem => path.indexOf(Citem.key) === 0);
+                    if(Citem){
+                        this.openKey = item.key;
+                    }
+                    pre.push((<SubMenu key={item.key} icon={item.icon} title={item.title}>
                         {
                             this.renderAllList(item.children)
                         }
-                    </SubMenu>
-                )
+                    </SubMenu>));
+                }
+              
             }
-        })
+            return pre;
+            
+        },[])
     }
 
     componentWillMount(){
@@ -84,24 +98,6 @@ class Leftnav extends Component {
                     mode="inline"
                     theme="dark"
                 >
-                    {/* <Menu.Item key="1" icon={<PieChartOutlined />}>
-                        <Link to="/home">首页</Link>
-          </Menu.Item>
-                    <SubMenu key="sub1" icon={<AppstoreOutlined />} title="商品">
-                        <Menu.Item key="2" icon={<MenuOutlined />}><Link to="/category">品类管理</Link></Menu.Item>
-                        <Menu.Item key="3" icon={<MenuOutlined />}><Link to="/product">商品管理</Link></Menu.Item>
-                    </SubMenu>
-                    <Menu.Item key="4" icon={<TeamOutlined/>}>
-                    <Link to="/user">用户管理</Link>
-          </Menu.Item>
-                    <Menu.Item key="5" icon={<UserOutlined />}>
-                    <Link to="/role">角色管理</Link>
-          </Menu.Item>
-                    <SubMenu key="sub2" icon={<AreaChartOutlined />} title="图形图表">
-                        <Menu.Item key="6" icon={<BarChartOutlined />}>柱形图</Menu.Item>
-                        <Menu.Item key="7" icon={<LineChartOutlined />}>折线图</Menu.Item>
-                        <Menu.Item key="8" icon={<PieChartOutlined />}>饼图</Menu.Item>
-                    </SubMenu> */}
 
                     {
                         this.MenuNodes
