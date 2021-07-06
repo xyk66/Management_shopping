@@ -150,7 +150,7 @@ export default class Home extends Component {
                 loading={loading}
                 rowKey='_id' 
                 bordered
-                pagination={{defaultPageSize : PAGE_SIZE,showQuickJumper : true,total,
+                pagination={{current : this.pageNum,defaultPageSize : PAGE_SIZE,showQuickJumper : true,total,
                     onChange : pageNum => {this.getproducts(pageNum)}
                 }}
                 />

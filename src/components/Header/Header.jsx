@@ -25,6 +25,7 @@ class Header extends Component {
 
     state = {
         date: formateDate(Date.now()),
+        weather : ""
     }
 
 
@@ -71,6 +72,30 @@ class Header extends Component {
     //页面首页渲染时 挂到页面
     componentDidMount() {
         this.gettime();
+        var xhr = new XMLHttpRequest();
+
+        new Promise((resolve,reject) => {
+            xhr.onreadystatechange = () => {
+                if(xhr.readyState === 4){
+                    if(xhr.status === 200){
+                        resolve(xhr.responseText)
+                    }else{
+                        reject("错误!");
+                    }
+                }
+            }
+            xhr.open("GET","https://restapi.amap.com/v3/weather/weatherInfo?key=de027e159d41ae65add9dc230560e169&city=420502&extensions=all&output=JSON",true);
+            xhr.send(null);
+        }).then(value => {
+            // console.log(value);
+            var weather = JSON.parse(value).forecasts[0].casts[0].dayweather;
+            this.setState({weather});
+            // console.log(weather);
+        }).catch(err => {
+            console.error(err);
+        });
+
+        
     }
 
     //页面卸载时 卸载定时器
@@ -85,9 +110,11 @@ class Header extends Component {
         const user = Memory.user.username;
 
         const { date } = this.state;
+        // console.log(this.state.weather);
 
         //获取当前需要显示的标题
         const Nowtitle = this.getTitle();
+
         return (
             <header>
                 <div className="headerTop">
@@ -101,7 +128,7 @@ class Header extends Component {
                             {date}
                         </span>
                         <img src={logo} alt="" />
-                        <span>晴</span>
+                        <span>{this.state.weather}</span>
                     </div>
                 </div>
             </header>

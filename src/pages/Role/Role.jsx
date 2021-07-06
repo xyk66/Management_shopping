@@ -151,7 +151,7 @@ export default class Role extends Component {
                <Table 
                 dataSource={roles} 
                 columns={this.columns} 
-                rowSelection ={{type : 'radio',selectedRowKeys : [role._id]}}
+                rowSelection ={{type : 'radio',selectedRowKeys : [role._id],onSelect : role => this.setState({role})}}
                 bordered 
                 rowKey="_id" 
                 pagination={{defaultPageSize:5}}
